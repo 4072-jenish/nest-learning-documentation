@@ -1,0 +1,705 @@
+# NestJS — Custom Learning Documentation 🚀
+
+## What Is NestJS?
+
+entity["software","NestJS","Node.js backend framework"] is a backend framework built on top of:
+
+- Node.js
+- Express/Fastify
+- TypeScript
+
+Its main goal is:
+
+```txt
+Provide clean architecture for backend applications.
+```
+
+NestJS is heavily inspired by:
+- Angular architecture
+- Dependency Injection systems
+- Enterprise backend patterns
+
+---
+
+# Main Philosophy of NestJS
+
+NestJS says:
+
+```txt
+Framework handles structure.
+Developer handles business logic.
+```
+
+Instead of writing:
+- routing manually
+- middleware setup everywhere
+- architecture repeatedly
+- boilerplate organization
+
+NestJS gives:
+- modules
+- controllers
+- services
+- decorators
+- dependency injection
+- validation system
+- auth system structure
+
+already organized.
+
+---
+
+# How NestJS Works Internally
+
+## Real Request Lifecycle
+
+```txt
+Client Request
+      ↓
+Middleware
+      ↓
+Guards
+      ↓
+Interceptors (before)
+      ↓
+Pipes (validation/transformation)
+      ↓
+Controller
+      ↓
+Service
+      ↓
+Repository / Database
+      ↓
+Interceptors (after)
+      ↓
+Response
+```
+
+This is the actual NestJS mechanism.
+
+---
+
+# Core Architecture
+
+## 1. Module
+
+Module is a feature container.
+
+Example:
+
+```ts
+@Module({
+  imports: [],
+  controllers: [],
+  providers: [],
+})
+export class UsersModule {}
+```
+
+### Purpose
+
+Modules organize:
+- controllers
+- services
+- providers
+- database entities
+
+### Mental Model
+
+```txt
+Module = Feature container
+```
+
+---
+
+# 2. Controller
+
+Controller handles incoming HTTP requests.
+
+Example:
+
+```ts
+@Controller('users')
+export class UsersController {
+
+  @Get()
+  findAll() {}
+
+}
+```
+
+### Route Generated
+
+```txt
+GET /users
+```
+
+### Purpose
+
+Controller should:
+- receive request
+- extract request data
+- call service
+- return response
+
+Controller should NOT contain heavy business logic.
+
+---
+
+# 3. Service
+
+Service contains business logic.
+
+Example:
+
+```ts
+@Injectable()
+export class UsersService {
+
+  findAll() {
+    return [];
+  }
+
+}
+```
+
+### Purpose
+
+Services handle:
+- database operations
+- auth logic
+- reusable logic
+- API logic
+
+### Mental Model
+
+```txt
+Controller = Request handler
+Service = Business logic
+```
+
+---
+
+# 4. Entity
+
+Entity represents a database table.
+
+Example:
+
+```ts
+@Entity()
+export class User {
+
+  @PrimaryGeneratedColumn()
+  id!: number;
+
+  @Column()
+  firstName!: string;
+
+  @Column()
+  email!: string;
+
+}
+```
+
+### What Happens
+
+TypeORM reads decorators:
+
+```txt
+@Entity()
+@Column()
+```
+
+Then creates:
+
+```txt
+users table
+```
+
+inside PostgreSQL.
+
+---
+
+# 5. Repository
+
+Repository connects service ↔ database.
+
+Example:
+
+```ts
+@InjectRepository(User)
+private userRepository: Repository<User>
+```
+
+### Used For
+
+- create
+- find
+- update
+- delete
+
+Example:
+
+```ts
+await this.userRepository.find();
+```
+
+---
+
+# How Routing Works In NestJS
+
+NestJS routing is:
+
+```txt
+Decorator-based
+```
+
+NOT folder-based like Next.js.
+
+---
+
+# Example
+
+```ts
+@Controller('auth')
+export class AuthController {
+
+  @Post('login')
+  login() {}
+
+}
+```
+
+Creates:
+
+```txt
+POST /auth/login
+```
+
+---
+
+# Route Combination Mechanism
+
+NestJS combines:
+
+```txt
+@Controller('auth')
++
+@Post('login')
+```
+
+Result:
+
+```txt
+/auth/login
+```
+
+---
+
+# How NestJS Handles req.body
+
+In Express:
+
+```ts
+req.body
+```
+
+In NestJS:
+
+```ts
+@Body()
+```
+
+Example:
+
+```ts
+@Post()
+create(@Body() body: CreateUserDto) {}
+```
+
+NestJS automatically extracts request body.
+
+---
+
+# How NestJS Handles Params
+
+Example:
+
+```ts
+@Get(':id')
+findOne(@Param('id') id: string) {}
+```
+
+URL:
+
+```txt
+/users/5
+```
+
+Value:
+
+```txt
+id = 5
+```
+
+Equivalent Express code:
+
+```ts
+req.params.id
+```
+
+---
+
+# How NestJS Handles Query
+
+Example:
+
+```ts
+@Get()
+find(@Query('search') search: string) {}
+```
+
+URL:
+
+```txt
+/users?search=jenish
+```
+
+Value:
+
+```txt
+search = jenish
+```
+
+Equivalent Express code:
+
+```ts
+req.query.search
+```
+
+---
+
+# How NestJS Handles Headers
+
+Example:
+
+```ts
+@Get()
+profile(@Headers('authorization') token: string) {}
+```
+
+Equivalent Express:
+
+```ts
+req.headers.authorization
+```
+
+---
+
+# Full Request Object
+
+Example:
+
+```ts
+@Get()
+profile(@Req() req: Request) {}
+```
+
+This gives full Express request object.
+
+---
+
+# Full Response Object
+
+Example:
+
+```ts
+@Get()
+profile(@Res() res: Response) {}
+```
+
+Used for manual response handling.
+
+---
+
+# Important Decorators You Learned
+
+| Decorator | Purpose |
+|---|---|
+| @Controller() | route group |
+| @Get() | GET route |
+| @Post() | POST route |
+| @Patch() | PATCH route |
+| @Delete() | DELETE route |
+| @Body() | request body |
+| @Param() | URL params |
+| @Query() | query params |
+| @Headers() | headers |
+| @Req() | full request |
+| @Res() | full response |
+| @Injectable() | service/provider |
+| @Module() | module definition |
+
+---
+
+# Dependency Injection (VERY IMPORTANT)
+
+NestJS automatically injects dependencies.
+
+Example:
+
+```ts
+constructor(
+  private usersService: UsersService,
+) {}
+```
+
+NestJS creates service instance automatically.
+
+You do NOT manually create:
+
+```ts
+new UsersService()
+```
+
+This mechanism is called:
+
+```txt
+Dependency Injection
+```
+
+---
+
+# DTOs
+
+DTO means:
+
+```txt
+Data Transfer Object
+```
+
+Used for:
+- request structure
+- validation
+- type safety
+
+Example:
+
+```ts
+export class CreateUserDto {
+
+  @IsEmail()
+  email: string;
+
+  @MinLength(6)
+  password: string;
+
+}
+```
+
+---
+
+# Validation Mechanism
+
+NestJS validation works through:
+
+```txt
+ValidationPipe
+```
+
+Enabled in:
+
+```ts
+app.useGlobalPipes(
+  new ValidationPipe(),
+)
+```
+
+---
+
+# Validation Flow
+
+```txt
+Request
+   ↓
+ValidationPipe
+   ↓
+DTO decorators checked
+   ↓
+invalid request blocked
+```
+
+Controller never executes for invalid data.
+
+---
+
+# Middleware
+
+Middleware runs before controller.
+
+Example:
+
+```ts
+@Injectable()
+export class AuthMiddleware implements NestMiddleware {
+
+  use(req, res, next) {
+
+    console.log('middleware running');
+
+    next();
+  }
+}
+```
+
+---
+
+# Middleware Flow
+
+```txt
+Request
+   ↓
+Middleware
+   ↓
+next()
+   ↓
+Controller
+```
+
+---
+
+# JWT Authentication Flow
+
+You implemented:
+
+```txt
+Login
+   ↓
+Compare password
+   ↓
+Generate JWT token
+   ↓
+Send token to client
+```
+
+Then middleware verifies token:
+
+```txt
+Protected Route
+   ↓
+Middleware checks token
+   ↓
+Valid → next()
+Invalid → 401
+```
+
+---
+
+# Async/Await + Database
+
+Database operations are async.
+
+Examples:
+
+```ts
+await this.userRepository.find();
+```
+
+```ts
+await this.userRepository.save(user);
+```
+
+Without await:
+
+```txt
+You get Promise object
+```
+
+With await:
+
+```txt
+You get actual database data
+```
+
+---
+
+# Why NestJS Feels Different
+
+NestJS is not just:
+
+```txt
+Express with decorators
+```
+
+It follows:
+- enterprise architecture
+- separation of concerns
+- dependency injection
+- scalable modular systems
+
+---
+
+# What You Built Today
+
+You built:
+
+✅ CRUD APIs
+✅ PostgreSQL connection
+✅ TypeORM integration
+✅ JWT login
+✅ middleware
+✅ DTO validation
+✅ repository pattern
+✅ database operations
+✅ route handling
+
+---
+
+# Most Important Understanding
+
+You learned WHY backend architecture exists.
+
+```txt
+Controller → route handling
+Service → business logic
+Repository → database
+DTO → validation
+Middleware → request processing
+```
+
+This is the core backend engineering mindset.
+
+---
+
+# Next Best Topics To Learn
+
+## Recommended Order
+
+1. Validation deeper
+2. Guards
+3. Passport JWT
+4. Exception filters
+5. Database relations
+6. Prisma ORM
+7. File uploads
+8. Interceptors
+9. Testing
+10. Microservices
+
+---
+
+# Final Mental Model
+
+```txt
+NestJS
+   ↓
+Structured backend framework
+   ↓
+Uses decorators + modules + dependency injection
+   ↓
+Helps build scalable APIs cleanly
+```
+
+🔥
+
